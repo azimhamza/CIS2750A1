@@ -3,6 +3,7 @@
 #include <math.h>
 #include <string.h>
 
+#define M_PI 3.14159265358979323846
 // setter for an atom
 void atomset(atom *atom, char element[3], double *x, double *y, double *z)
 {
