@@ -171,29 +171,40 @@ void molfree(molecule *ptr)
 void molappend_atom(molecule *molecule, atom *atom)
 {
     int i;
+    // Loop through the atom pointers in the molecule
     for (i = 0; i < molecule->atom_no; i++)
     {
+        // If there is an empty slot, add the atom to it
         if (molecule->atom_ptrs[i] == NULL)
         {
             molecule->atoms[i] = *atom;
             break;
         }
     }
+    // Add the address of the newly added atom to the atom pointers in the molecule
     molecule->atom_ptrs[molecule->atom_no] = &molecule->atoms[i];
+    // Increment the atom number in the molecule
     molecule->atom_no++;
-
+    // If the number of atoms in the molecule equals the max number of atoms
     if (molecule->atom_no == molecule->atom_max)
     {
+        // If the max number of atoms is 0, set it to 1
         if (molecule->atom_max == 0)
         {
             molecule->atom_max = 1;
         }
+        // Otherwise, double the max number of atoms
         else
         {
             molecule->atom_max *= 2;
         }
+        // Reallocate memory for the atoms array in the molecule to be twice its current size
         molecule->atoms = realloc(molecule->atoms, sizeof(atom) * molecule->atom_max);
+        // Reallocate memory for the atom pointers array in the molecule to be twice its current size
+
         molecule->atom_ptrs = realloc(molecule->atom_ptrs, sizeof(*atom) * molecule->atom_max);
+        // Update the addresses of the atoms in the molecule
+
         for (i = 0; i < molecule->atom_no; i++)
         {
             molecule->atom_ptrs[i] = &molecule->atoms[i];
@@ -201,32 +212,44 @@ void molappend_atom(molecule *molecule, atom *atom)
     }
 };
 
+// Function to append a bond to the end of a molecule
 void molappend_bond(molecule *molecule, bond *bond)
 {
     int i;
+    // Loop to find the first NULL element in bond_ptrs array
     for (i = 0; i < molecule->bond_no; i++)
     {
         if (molecule->bond_ptrs[i] == NULL)
         {
+            // Assign the bond to the first NULL element in bonds array
             molecule->bonds[i] = *bond;
             break;
         }
     }
+    // Add the address of the bond to the bond_ptrs array
     molecule->bond_ptrs[molecule->bond_no] = &molecule->bonds[i];
+    // Increment the number of bonds in the molecule
     molecule->bond_no++;
 
+    // If the number of bonds equals the maximum number of bonds, reallocate memory
     if (molecule->bond_no == molecule->bond_max)
     {
+        // If the maximum number of bonds is 0, set it to 1
         if (molecule->bond_max == 0)
         {
             molecule->bond_max = 1;
         }
         else
         {
+            // Double the maximum number of bonds
+
             molecule->bond_max *= 2;
         }
+        // Reallocate memory for the bonds and bond_ptrs arrays
+
         molecule->bonds = realloc(molecule->bonds, sizeof(bond) * molecule->bond_max);
         molecule->bond_ptrs = realloc(molecule->bond_ptrs, sizeof(*bond) * molecule->bond_max);
+        // Update the addresses of the bonds in the bond_ptrs array
         for (i = 0; i < molecule->bond_no; i++)
         {
             molecule->bond_ptrs[i] = &molecule->bonds[i];
@@ -234,69 +257,95 @@ void molappend_bond(molecule *molecule, bond *bond)
     }
 }
 
+// cmp function compares two atom pointers based on their z value
 int cmp(const void *a, const void *b)
 {
+    // calculate z value of first atom
     double a_z = (*(atom **)a)->z;
+    // calculate z value of second atom
     double b_z = (*(atom **)b)->z;
+    // return 1 if the z value of first atom is greater than second
     if (a_z > b_z)
         return 1;
+    // return -1 if the z value of first atom is less than second
     else if (a_z < b_z)
         return -1;
+    // return 0 if the z values of both atoms are equal
     else
         return 0;
 }
 
+// bondcmp function compares two bond pointers based on their z value
 int bondcmp(const void *a, const void *b)
 {
+    // calculate z value of first bond by taking average of the z values of its two atoms
     double a_z = ((*(bond **)a)->a1->z + (*(bond **)a)->a2->z) / 2;
+    // calculate z value of second bond by taking average of the z values of its two atoms
     double b_z = ((*(bond **)b)->a1->z + (*(bond **)b)->a2->z) / 2;
+    // return 1 if the z value of first bond is greater than second
     if (a_z > b_z)
         return 1;
+    // return -1 if the z value of first bond is less than second
     else if (a_z < b_z)
         return -1;
+    // return 0 if the z values of both bonds are equal
     else
         return 0;
 }
 
+// sort atoms and bonds in a molecule based on the Z coordinate value
 void molsort(molecule *molecule)
 {
-
+// sort atoms using qsort and the comparison function cmp
     qsort(molecule->atom_ptrs, molecule->atom_no, sizeof(atom *), cmp);
-
+// sort bonds using qsort and the comparison function bondcmp
     qsort(molecule->bond_ptrs, molecule->bond_no, sizeof(bond *), bondcmp);
 }
 
-void xrotation(xform_matrix xform_matrix, unsigned short deg)
-{
-    // Convert deg to radians
-    double rad = deg * (M_PI / 180);
-    // Compute the transformation matrix
-    xform_matrix[0][0] = 1;
-    xform_matrix[0][1] = 0;
-    xform_matrix[0][2] = 0;
-    xform_matrix[1][0] = 0;
-    xform_matrix[1][1] = cos(rad);
-    xform_matrix[1][2] = -sin(rad);
-    xform_matrix[2][0] = 0;
-    xform_matrix[2][1] = sin(rad);
-    xform_matrix[2][2] = cos(rad);
+// Function to apply a rotation transformation in the X-axis to a given transformation matrix
+// deg - angle of rotation in degrees
+// xform_matrix - transformation matrix to be updated
+typedef float xform_matrix[4][4];
+void xrotation(xform_matrix xform, unsigned short deg) {
+float rad = deg * M_PI / 180.0f;
+xform[0][0] = 1;
+xform[1][1] = cos(rad);
+xform[1][2] = -sin(rad);
+xform[2][1] = sin(rad);
+xform[2][2] = cos(rad);
+xform[3][3] = 1;
 }
 
-void yrotation(xform_matrix xform_matrix, unsigned short deg)
-{
-    // Convert deg to radians
-    double rad = deg * (M_PI / 180);
-    // Compute the transformation matrix
-    xform_matrix[0][0] = cos(rad);
-    xform_matrix[0][1] = 0;
-    xform_matrix[0][2] = sin(rad);
-    xform_matrix[1][0] = 0;
-    xform_matrix[1][1] = 1;
-    xform_matrix[1][2] = 0;
-    xform_matrix[2][0] = -sin(rad);
-    xform_matrix[2][1] = 0;
-    xform_matrix[2][2] = cos(rad);
+// This function calculates the transformation matrix for y-axis rotation
+// The input is a 3x3 transformation matrix and an angle in degrees
+// The output is the transformation matrix with y-axis rotation applied
+typedef float xform_matrix[4][4];
+
+void yrotation(xform_matrix xform, unsigned short deg) {
+    float rad = deg * M_PI / 180.0f;
+    xform[0][0] = cos(rad);
+    xform[0][2] = sin(rad);
+    xform[1][1] = 1;
+    xform[2][0] = -sin(rad);
+    xform[2][2] = cos(rad);
+    xform[3][3] = 1;
 }
+
+typedef float xform_matrix[4][4];
+void zrotation(xform_matrix xform, unsigned short deg) {
+    float rad = deg * M_PI / 180.0f;
+    xform[0][0] = cos(rad);
+    xform[0][1] = -sin(rad);
+    xform[1][0] = sin(rad);
+    xform[1][1] = cos(rad);
+    xform[2][2] = 1;
+    xform[3][3] = 1;
+}
+
+
+// This helper function computes the transformation matrix for rotation about an arbitrary axis
+// Input is the 3x3 transformation matrix and an angle in radians
+// Output is the transformation matrix with rotation applied
 
 void computeRotationMatrix(xform_matrix xform_matrix, double rad)
 {
@@ -311,14 +360,17 @@ void computeRotationMatrix(xform_matrix xform_matrix, double rad)
     xform_matrix[2][2] = 1;
 }
 
-void zrotation(xform_matrix xform_matrix, unsigned short deg)
-{
-    // Convert deg to radians
-    double rad = deg * (M_PI / 180);
-    // Compute the transformation matrix
-    computeRotationMatrix(xform_matrix, rad);
-}
+// This function computes the transformation matrix for rotation about the z-axis
+// Input is the 3x3 transformation matrix and an angle in degrees
+// Output is the transformation matrix with z-axis rotation applied
 
+// Convert the input angle from degrees to radians
+
+
+
+// This function transforms an atom by applying the specified transformation matrix
+// Input is a pointer to an atom and a 3x3 transformation matrix
+// Output is the transformed atom
 void transform_atom(atom *a, xform_matrix matrix)
 {
     double x = a->x;
@@ -330,6 +382,9 @@ void transform_atom(atom *a, xform_matrix matrix)
     a->z = matrix[2][0] * x + matrix[2][1] * y + matrix[2][2] * z;
 }
 
+// This function transforms a molecule by applying the specified transformation matrix to each atom
+// Input is a pointer to a molecule and a 3x3 transformation matrix
+// Output is the transformed molecule
 void mol_xform(molecule *molecule, xform_matrix matrix)
 {
     for (int i = 0; i < molecule->atom_no; i++)
