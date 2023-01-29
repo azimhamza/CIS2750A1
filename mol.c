@@ -306,36 +306,33 @@ void molsort(molecule *molecule)
 // deg - angle of rotation in degrees
 // xform_matrix - transformation matrix to be updated
 void xrotation(xform_matrix xform, unsigned short deg) {
-float rad = deg * M_PI / 180.0f;
-xform[0][0] = 1;
-xform[1][1] = cos(rad);
-xform[1][2] = -sin(rad);
-xform[2][1] = sin(rad);
-xform[2][2] = cos(rad);
-xform[3][3] = 1;
+    double rad = deg * M_PI / 180.0;
+    xform[0][0] = 1;
+    xform[1][1] = cos(rad);
+    xform[1][2] = -sin(rad);
+    xform[2][1] = sin(rad);
+    xform[2][2] = cos(rad);
 }
 
 // This function calculates the transformation matrix for y-axis rotation
 // The input is a 3x3 transformation matrix and an angle in degrees
 // The output is the transformation matrix with y-axis rotation applied
 void yrotation(xform_matrix xform, unsigned short deg) {
-    float rad = deg * M_PI / 180.0f;
-    xform[0][0] = cos(rad);
-    xform[0][2] = sin(rad);
-    xform[1][1] = 1;
-    xform[2][0] = -sin(rad);
-    xform[2][2] = cos(rad);
-    xform[3][3] = 1;
+double rad = deg * M_PI / 180.0;
+xform[0][0] = cos(rad);
+xform[0][2] = sin(rad);
+xform[2][0] = -sin(rad);
+xform[2][2] = cos(rad);
+xform[1][1] = 1;
 }
 
 void zrotation(xform_matrix xform, unsigned short deg) {
-    float rad = deg * M_PI / 180.0f;
+    double rad = deg * M_PI / 180.0;
     xform[0][0] = cos(rad);
     xform[0][1] = -sin(rad);
     xform[1][0] = sin(rad);
     xform[1][1] = cos(rad);
     xform[2][2] = 1;
-    xform[3][3] = 1;
 }
 
 
