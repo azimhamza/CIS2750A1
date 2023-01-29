@@ -305,7 +305,6 @@ void molsort(molecule *molecule)
 // Function to apply a rotation transformation in the X-axis to a given transformation matrix
 // deg - angle of rotation in degrees
 // xform_matrix - transformation matrix to be updated
-typedef float xform_matrix[4][4];
 void xrotation(xform_matrix xform, unsigned short deg) {
 float rad = deg * M_PI / 180.0f;
 xform[0][0] = 1;
@@ -319,8 +318,6 @@ xform[3][3] = 1;
 // This function calculates the transformation matrix for y-axis rotation
 // The input is a 3x3 transformation matrix and an angle in degrees
 // The output is the transformation matrix with y-axis rotation applied
-typedef float xform_matrix[4][4];
-
 void yrotation(xform_matrix xform, unsigned short deg) {
     float rad = deg * M_PI / 180.0f;
     xform[0][0] = cos(rad);
@@ -331,7 +328,6 @@ void yrotation(xform_matrix xform, unsigned short deg) {
     xform[3][3] = 1;
 }
 
-typedef float xform_matrix[4][4];
 void zrotation(xform_matrix xform, unsigned short deg) {
     float rad = deg * M_PI / 180.0f;
     xform[0][0] = cos(rad);
