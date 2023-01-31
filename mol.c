@@ -67,6 +67,7 @@ molecule *molmalloc(unsigned short atom_max, unsigned short bond_max)
     m->atom_ptrs = (atom **)malloc(atom_max * sizeof(atom *));
     if (m->atom_ptrs == NULL)
     {
+        perror("null atom_ptrs in molmalloc <Error>");
         return NULL;
     }
 
@@ -75,12 +76,14 @@ molecule *molmalloc(unsigned short atom_max, unsigned short bond_max)
     m->bonds = (bond *)malloc(bond_max * sizeof(bond));
     if (m->bonds == NULL)
     {
+        perror("null bonds in molmalloc <Error>");
         return NULL;
     }
 
     m->bond_ptrs = (bond **)malloc(bond_max * sizeof(bond *));
     if (m->bond_ptrs == NULL)
     {
+        perror("null bond_ptrs in molmalloc <Error>");
         return NULL;
     }
 
