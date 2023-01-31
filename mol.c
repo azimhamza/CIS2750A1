@@ -60,6 +60,7 @@ molecule *molmalloc(unsigned short atom_max, unsigned short bond_max)
     m->atoms = (atom *)malloc(atom_max * sizeof(atom));
     if (m->atoms == NULL)
     {
+        perror("null atoms in molmalloc <Error>");
         return NULL;
     }
 
