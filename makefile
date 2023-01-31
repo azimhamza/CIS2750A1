@@ -8,13 +8,13 @@ test1.o: test1.c
 	gcc -std=c99 -Wall -lm -c test1.c
 
 test2: test2.o
-	gcc -std=c99 -Wall -lm -lmol test2.o -o test2
+	gcc -std=c99 -Wall -lm test2.o -o test2
 
 test2.o: test2.c
 	gcc -std=c99 -Wall -lm -c test2.c
 
 test3: test3.o mol.o
-	gcc -std=c99 -Wall -lm test3.o mol.o -o test3
+	gcc -std=c99 -Wall -lm test1.o mol.o -o test3
 
 test3.o: test3.c
 	gcc -std=c99 -Wall -lm -c test3.c
