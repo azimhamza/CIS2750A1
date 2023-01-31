@@ -3,6 +3,7 @@
 #include <math.h>
 #include <string.h>
 
+#define PI 3.14159265
 // setter for an atom
 void atomset(atom *atom, char element[3], double *x, double *y, double *z)
 {
@@ -226,7 +227,7 @@ int compare_bond_z(const void *a, const void *b)
 // xform_matrix - transformation matrix to be updated
 void xrotation(xform_matrix xform_matrix, unsigned short deg)
 {
-    double rad = deg * M_PI / 180.0; // Convert degrees to radians
+    double rad = deg * PI / 180.0; // Convert degrees to radians
 
     xform_matrix[0][0] = 1;
     xform_matrix[0][1] = 0;
@@ -244,7 +245,7 @@ void xrotation(xform_matrix xform_matrix, unsigned short deg)
 // The output is the transformation matrix with y-axis rotation applied
 void yrotation(xform_matrix xform_matrix, unsigned short deg)
 {
-    double rad = deg * M_PI / 180; // Convert degrees to radians
+    double rad = deg * PI / 180; // Convert degrees to radians
 
     xform_matrix[0][0] = cos(rad);
     xform_matrix[0][1] = 0;
@@ -260,7 +261,7 @@ void yrotation(xform_matrix xform_matrix, unsigned short deg)
 void zrotation(xform_matrix xform_matrix, unsigned short deg)
 {
     // Convert the rotation angle from degrees to radians
-    double rad = deg * M_PI / 180;
+    double rad = deg * PI / 180;
 
     // Initialize the transformation matrix to the identity matrix
     xform_matrix[0][0] = cos(rad);
