@@ -167,8 +167,8 @@ void molappend_atom(molecule *mol, atom *at) {
     mol->atom_ptrs = realloc(mol->atom_ptrs, mol->atom_max * sizeof(atom*));
 }
 
-  mol->atoms[mol->atom_no] = *at;
-  mol->atom_ptrs[mol->atom_no] = &mol->atoms[mol->atom_no];
+
+  mol->atom_ptrs[mol->atom_no] = at;
   ++mol->atom_no;
 }
 
