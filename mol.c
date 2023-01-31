@@ -345,19 +345,25 @@ void zrotation(xform_matrix xform_matrix, unsigned short deg)
 // This function transforms an atom by applying the specified transformation matrix
 // Input is a pointer to an atom and a 3x3 transformation matrix
 // Output is the transformed atom
-void mol_xform(molecule *mol, xform_matrix matrix)
+void mol_xform(molecule *molecule, xform_matrix matrix)
 {
-    if (!mol)
-        return;
-    int i, j;
+    // define variables
+    int i;
     double x, y, z;
-    for (i = 0; i < mol->atom_no; i++)
+    // get the number of atoms in the molecule
+    int num_atoms = molecule->atom_no;
+
+    // loop through the atoms in the molecule
+    for (i = 0; i < num_atoms; i++)
     {
-        x = mol->atoms[i].x;
-        y = mol->atoms[i].y;
-        z = mol->atoms[i].z;
-        mol->atoms[i].x = matrix[0][0] * x + matrix[0][1] * y + matrix[0][2] * z + matrix[0][3];
-        mol->atoms[i].y = matrix[1][0] * x + matrix[1][1] * y + matrix[1][2] * z + matrix[1][3];
-        mol->atoms[i].z = matrix[2][0] * x + matrix[2][1] * y + matrix[2][2] * z + matrix[2][3];
+        // get the x, y, and z coordinates of the atom
+        x = molecule->atoms[i].x;
+        y = molecule->atoms[i].y;
+        z = molecule->atoms[i].z;
+
+// apply the transformation matrix to the atom coordinates and update the atom coordinates
+        molecule->atoms[i].x = matrix[0][0] * x + matrix[0][1] * y + matrix[0][2] * z;
+        molecule->atoms[i].y = matrix[1][0] * x + matrix[1][1] * y + matrix[1][2] * z;
+        molecule->atoms[i].z = matrix[2][0] * x + matrix[2][1] * y + matrix[2][2] * z;
     }
 }
