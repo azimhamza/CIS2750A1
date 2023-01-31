@@ -36,9 +36,10 @@ molecule *molcopy(molecule *src);
 void molfree(molecule *ptr);
 void molappend_atom(molecule *molecule, atom *atom);
 void molappend_bond(molecule *molecule, bond *bond);
-int cmp(const void *a, const void *b);
-int bondcmp(const void *a, const void *b);
+int compare_atom_z(const void *a, const void *b);
+int compare_bond_z(const void *a, const void *b);
 void molsort(molecule *molecule);
 void xrotation(xform_matrix xform_matrix, unsigned short deg);
 void yrotation(xform_matrix xform_matrix, unsigned short deg);
+void zrotation(xform_matrix xform_matrix, unsigned short deg);
 
