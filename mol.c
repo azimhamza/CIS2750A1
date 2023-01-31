@@ -3,7 +3,6 @@
 #include <math.h>
 #include <string.h>
 
-#define M_PI 3.14159265358979323846
 // setter for an atom
 void atomset(atom *atom, char element[3], double *x, double *y, double *z)
 {
@@ -23,7 +22,10 @@ void atomget(atom *atom, char element[3], double *x, double *y, double *z)
     *y = atom->y;
     *z = atom->z;
     // strncpy to copy all three element into the atom structure
-    strncpy(element, atom->element, 3);
+    for (int i = 0; i < 3; i++)
+    {
+        element[i] = atom->element[i];
+    }
 };
 
 // bond setter
@@ -44,64 +46,69 @@ void bondget(bond *bond, atom **a1, atom **a2, unsigned char *epairs)
     *epairs = bond->epairs;
 };
 
-// creating space
+/* function to allocate memory for a molecule structure */
 molecule *molmalloc(unsigned short atom_max, unsigned short bond_max)
 {
-    molecule *mole = (molecule *)malloc(sizeof(molecule));
-    // test case if its null
+    /* allocate memory for the molecule structure */
+    struct molecule *mole = (molecule *)malloc(sizeof(molecule));
+
+    /* check if memory allocation was successful */
     if (mole == NULL)
     {
-        printf("<Memory Error> for Molecule Struct (allocating)\n"); //
-        exit(1);
+        printf("<Memory Error> for Molecule Struct (allocating)\n"); // print error message
+        exit(1);                                                     // exit the program
     }
-    // set atom_max
+
+    /* set the maximum number of atoms */
     mole->atom_max = atom_max;
-    // initate array
+    /* initialize the number of atoms to zero */
     mole->atom_no = 0;
-    // mallocing the atom, multiplying the total atom_max with the size of atom
+    /* allocate memory for the atoms array */
     mole->atoms = (atom *)malloc(atom_max * sizeof(atom));
 
-    // checks if the atoms are null
+    /* check if memory allocation was successful */
     if (mole->atoms == NULL)
     {
-        printf("<Memory Error> for Atom Array (allocating)\n"); //
-        exit(1);
+        printf("<Memory Error> for Atom Array (allocating)\n"); // print error message
+        exit(1);                                                // exit the program
     }
-    // allocating pointer memory
+    /* allocate memory for the atom pointers array */
     mole->atom_ptrs = (atom **)malloc(atom_max * sizeof(atom *));
-    // null checker for atom_ptr
+    /* check if memory allocation was successful */
     if (mole->atom_ptrs == NULL)
     {
-        printf("<Memory Error> for Atom Pointer (allocating)\n");
-        exit(1);
+        printf("<Memory Error> for Atom Pointer (allocating)\n"); // print error message
+        exit(1);                                                  // exit the program
     }
 
-    // set atom max
+    /* set the maximum number of bonds */
     mole->bond_max = bond_max;
-    // initate array
+    /* initialize the number of bonds to zero */
     mole->bond_no = 0;
-    // mallocing the bond, multiplying the total bond_max with the size of bond
+    /* allocate memory for the bonds array */
     mole->bonds = (bond *)malloc(bond_max * sizeof(bond));
-    // checks if the bonds are null
+    /* check if memory allocation was successful */
     if (mole->bonds == NULL)
     {
-        printf("<Memory Error> for Bond Array (allocating)\n");
-        exit(1);
+        printf("<Memory Error> for Bond Array (allocating)\n"); // print error message
+        exit(1);                                                // exit the program
     }
-    // allocating pointer memory
+    /* allocate memory for the bond pointers array */
     mole->bond_ptrs = (bond **)malloc(bond_max * sizeof(bond *));
-    // null checker for bond_ptr
+    /* check if memory allocation was successful */
     if (mole->bond_ptrs == NULL)
     {
-        printf("<Memory Error> for Bond Pointer (allocating)\n");
-        exit(1);
+        printf("<Memory Error> for Bond Pointer (allocating)\n"); // print error message
+        exit(1);                                                  // exit the program
     }
+
+    /* return the pointer to the allocated memory */
     return mole;
 };
 
 molecule *molcopy(molecule *src)
 {
-    // error checker if the source moleculee is empty or NULL
+    // error checker if the source molecule is empty or NULL
     if (src == NULL)
     {
         printf("<Error> Source Molecule Struct is Empty\n");
@@ -121,17 +128,17 @@ molecule *molcopy(molecule *src)
         printf("<Error> Failure to allocate memory for new molecule\n");
         return NULL;
     }
-    // assigning the new_mole atom_no and bond_no
-    new_mole->atom_no = src->atom_no;
-    new_mole->bond_no = src->bond_no;
 
-    // copying all data for atoms, src->atom_no, src->atom_max, src->bond_no, src->bond_max
-
-    memcpy(new_mole->atoms, src->atoms, src->atom_no * sizeof(atom));
-    memcpy(new_mole->atom_ptrs, src->atom_ptrs, src->atom_no * sizeof(atom *));
-    memcpy(new_mole->bonds, src->bonds, src->bond_no * sizeof(bond));
-    memcpy(new_mole->bond_ptrs, src->bond_ptrs, src->bond_no * sizeof(bond *));
-
+    // copying the pointers
+    for (int i = 0; i < src->atom_no; i++)
+    {
+        new_mole->atom_ptrs[i] = &(new_mole->atoms[i]);
+    }
+    // copying the pointers
+    for (int i = 0; i < src->bond_no; i++)
+    {
+        new_mole->bond_ptrs[i] = &(new_mole->bonds[i]);
+    }
     return new_mole;
 };
 
@@ -168,146 +175,139 @@ void molfree(molecule *ptr)
 }
 
 // adds it to the end
-void molappend_atom(molecule *molecule, atom *atom)
+void molappend_atom(molecule *mol, atom *at)
 {
     int i;
     // Loop through the atom pointers in the molecule
-    for (i = 0; i < molecule->atom_no; i++)
+    for (i = 0; i < mol->atom_no; i++)
     {
         // If there is an empty slot, add the atom to it
-        if (molecule->atom_ptrs[i] == NULL)
+        if (mol->atom_ptrs[i] == NULL)
         {
-            molecule->atoms[i] = *atom;
+            mol->atoms[i] = *at;
             break;
         }
     }
     // Add the address of the newly added atom to the atom pointers in the molecule
-    molecule->atom_ptrs[molecule->atom_no] = &molecule->atoms[i];
+    mol->atom_ptrs[mol->atom_no] = &mol->atoms[i];
     // Increment the atom number in the molecule
-    molecule->atom_no++;
+    mol->atom_no++;
     // If the number of atoms in the molecule equals the max number of atoms
-    if (molecule->atom_no == molecule->atom_max)
+    if (mol->atom_no == mol->atom_max)
     {
         // If the max number of atoms is 0, set it to 1
-        if (molecule->atom_max == 0)
+        if (mol->atom_max == 0)
         {
-            molecule->atom_max = 1;
+            mol->atom_max = 1;
         }
         // Otherwise, double the max number of atoms
         else
         {
-            molecule->atom_max *= 2;
+            mol->atom_max *= 2;
         }
         // Reallocate memory for the atoms array in the molecule to be twice its current size
-        molecule->atoms = realloc(molecule->atoms, sizeof(atom) * molecule->atom_max);
+        mol->atoms = realloc(mol->atoms, sizeof(at) * mol->atom_max);
         // Reallocate memory for the atom pointers array in the molecule to be twice its current size
 
-        molecule->atom_ptrs = realloc(molecule->atom_ptrs, sizeof(*atom) * molecule->atom_max);
+        mol->atom_ptrs = realloc(mol->atom_ptrs, sizeof(*at) * mol->atom_max);
         // Update the addresses of the atoms in the molecule
 
-        for (i = 0; i < molecule->atom_no; i++)
+        for (i = 0; i < mol->atom_no; i++)
         {
-            molecule->atom_ptrs[i] = &molecule->atoms[i];
+            mol->atom_ptrs[i] = &mol->atoms[i];
         }
     }
 };
 
 // Function to append a bond to the end of a molecule
-void molappend_bond(molecule *molecule, bond *bond)
+void molappend_bond(molecule *mol, bond *bonder)
 {
     int i;
     // Loop to find the first NULL element in bond_ptrs array
-    for (i = 0; i < molecule->bond_no; i++)
+    for (i = 0; i < mol->bond_no; i++)
     {
-        if (molecule->bond_ptrs[i] == NULL)
+        if (mol->bond_ptrs[i] == NULL)
         {
             // Assign the bond to the first NULL element in bonds array
-            molecule->bonds[i] = *bond;
+            mol->bonds[i] = *bonder;
             break;
         }
     }
     // Add the address of the bond to the bond_ptrs array
-    molecule->bond_ptrs[molecule->bond_no] = &molecule->bonds[i];
+    mol->bond_ptrs[mol->bond_no] = &mol->bonds[i];
     // Increment the number of bonds in the molecule
-    molecule->bond_no++;
+    mol->bond_no++;
 
     // If the number of bonds equals the maximum number of bonds, reallocate memory
-    if (molecule->bond_no == molecule->bond_max)
+    if (mol->bond_no == mol->bond_max)
     {
         // If the maximum number of bonds is 0, set it to 1
-        if (molecule->bond_max == 0)
+        if (mol->bond_max == 0)
         {
-            molecule->bond_max = 1;
+            mol->bond_max = 1;
         }
         else
         {
             // Double the maximum number of bonds
 
-            molecule->bond_max *= 2;
+            mol->bond_max *= 2;
         }
         // Reallocate memory for the bonds and bond_ptrs arrays
 
-        molecule->bonds = realloc(molecule->bonds, sizeof(bond) * molecule->bond_max);
-        molecule->bond_ptrs = realloc(molecule->bond_ptrs, sizeof(*bond) * molecule->bond_max);
+        mol->bonds = realloc(mol->bonds, sizeof(bonder) * mol->bond_max);
+        mol->bond_ptrs = realloc(mol->bond_ptrs, sizeof(*bonder) * mol->bond_max);
         // Update the addresses of the bonds in the bond_ptrs array
-        for (i = 0; i < molecule->bond_no; i++)
+        for (i = 0; i < mol->bond_no; i++)
         {
-            molecule->bond_ptrs[i] = &molecule->bonds[i];
+            mol->bond_ptrs[i] = &mol->bonds[i];
         }
     }
 }
 
 // cmp function compares two atom pointers based on their z value
-int cmp(const void *a, const void *b)
+int atom_cmp(const void *a, const void *b)
 {
-    // calculate z value of first atom
-    double a_z = (*(atom **)a)->z;
-    // calculate z value of second atom
-    double b_z = (*(atom **)b)->z;
-    // return 1 if the z value of first atom is greater than second
-    if (a_z > b_z)
-        return 1;
-    // return -1 if the z value of first atom is less than second
-    else if (a_z < b_z)
-        return -1;
-    // return 0 if the z values of both atoms are equal
-    else
-        return 0;
+    // Cast the void pointers to atom pointers
+    atom **atom1 = (atom **)a;
+    // Cast the void pointers to atom pointers
+    atom **atom2 = (atom **)b;
+    // Compare the z values of the atoms
+    return ((*atom1)->z - (*atom2)->z);
 }
 
-// bondcmp function compares two bond pointers based on their z value
-int bondcmp(const void *a, const void *b)
+int bond_cmp(const void *a, const void *b)
 {
-    // calculate z value of first bond by taking average of the z values of its two atoms
-    double a_z = ((*(bond **)a)->a1->z + (*(bond **)a)->a2->z) / 2;
-    // calculate z value of second bond by taking average of the z values of its two atoms
-    double b_z = ((*(bond **)b)->a1->z + (*(bond **)b)->a2->z) / 2;
-    // return 1 if the z value of first bond is greater than second
-    if (a_z > b_z)
-        return 1;
-    // return -1 if the z value of first bond is less than second
-    else if (a_z < b_z)
-        return -1;
-    // return 0 if the z values of both bonds are equal
-    else
-        return 0;
+    bond **bond_a = (bond **)a;
+    bond **bond_b = (bond **)b;
+    double z_a = ((*bond_a)->a1->z + (*bond_a)->a2->z) / 2;
+    double z_b = ((*bond_b)->a1->z + (*bond_b)->a2->z) / 2;
+    return (z_a - z_b);
 }
 
-// sort atoms and bonds in a molecule based on the Z coordinate value
 void molsort(molecule *molecule)
 {
-// sort atoms using qsort and the comparison function cmp
-    qsort(molecule->atom_ptrs, molecule->atom_no, sizeof(atom *), cmp);
-// sort bonds using qsort and the comparison function bondcmp
-    qsort(molecule->bond_ptrs, molecule->bond_no, sizeof(bond *), bondcmp);
+    qsort(molecule->atom_ptrs, molecule->atom_no, sizeof(atom *), atom_cmp);
+    qsort(molecule->bond_ptrs, molecule->bond_no, sizeof(bond *), bond_cmp);
 }
 
 // Function to apply a rotation transformation in the X-axis to a given transformation matrix
 // deg - angle of rotation in degrees
 // xform_matrix - transformation matrix to be updated
-void xrotation(xform_matrix xform, unsigned short deg) {
-    double rad = deg * M_PI / 180.0;
-    xform[0][0] = 1;
+void xrotation(xform_matrix xform, unsigned short deg)
+{
+    // Convert the rotation angle from degrees to radians
+    double rad = deg * M_PI / 180;
+
+    // Initialize the transformation matrix to the identity matrix
+    for (int i = 0; i < 3; i++)
+    {
+        for (int j = 0; j < 3; j++)
+        {
+            xform[i][j] = (i == j) ? 1 : 0;
+        }
+    }
+
+    // Update the transformation matrix to reflect a rotation around the x-axis
     xform[1][1] = cos(rad);
     xform[1][2] = -sin(rad);
     xform[2][1] = sin(rad);
@@ -317,41 +317,49 @@ void xrotation(xform_matrix xform, unsigned short deg) {
 // This function calculates the transformation matrix for y-axis rotation
 // The input is a 3x3 transformation matrix and an angle in degrees
 // The output is the transformation matrix with y-axis rotation applied
-void yrotation(xform_matrix xform, unsigned short deg) {
-double rad = deg * M_PI / 180.0;
-xform[0][0] = cos(rad);
-xform[0][2] = sin(rad);
-xform[2][0] = -sin(rad);
-xform[2][2] = cos(rad);
-xform[1][1] = 1;
+void yrotation(xform_matrix xform, unsigned short deg)
+{
+    double rad = deg * M_PI / 180; // Convert degrees to radians
+
+    // initailize the transformation matrix to the identity matrix
+    for (int i = 0; i < 3; i++)
+    {
+        for (int j = 0; j < 3; j++)
+        {
+            xform[i][j] = 0;
+        }
+    }
+    xform[0][0] = cos(rad);
+    xform[0][2] = sin(rad);
+    xform[2][0] = -sin(rad);
+    xform[2][2] = cos(rad);
+    xform[1][1] = 1;
 }
 
-void zrotation(xform_matrix xform, unsigned short deg) {
-    double rad = deg * M_PI / 180.0;
+void zrotation(xform_matrix xform, unsigned short deg)
+{
+    // Convert the rotation angle from degrees to radians
+    double rad = deg * M_PI / 180;
+
+    // Initialize the transformation matrix to the identity matrix
+    for (int i = 0; i < 3; i++)
+    {
+        for (int j = 0; j < 3; j++)
+        {
+            xform[i][j] = (i == j) ? 1 : 0;
+        }
+    }
+
+    // Update the transformation matrix to reflect a rotation around the z-axis
     xform[0][0] = cos(rad);
     xform[0][1] = -sin(rad);
     xform[1][0] = sin(rad);
     xform[1][1] = cos(rad);
-    xform[2][2] = 1;
 }
-
 
 // This helper function computes the transformation matrix for rotation about an arbitrary axis
 // Input is the 3x3 transformation matrix and an angle in radians
 // Output is the transformation matrix with rotation applied
-
-void computeRotationMatrix(xform_matrix xform_matrix, double rad)
-{
-    xform_matrix[0][0] = cos(rad);
-    xform_matrix[0][1] = -sin(rad);
-    xform_matrix[0][2] = 0;
-    xform_matrix[1][0] = sin(rad);
-    xform_matrix[1][1] = cos(rad);
-    xform_matrix[1][2] = 0;
-    xform_matrix[2][0] = 0;
-    xform_matrix[2][1] = 0;
-    xform_matrix[2][2] = 1;
-}
 
 // This function computes the transformation matrix for rotation about the z-axis
 // Input is the 3x3 transformation matrix and an angle in degrees
@@ -359,29 +367,19 @@ void computeRotationMatrix(xform_matrix xform_matrix, double rad)
 
 // Convert the input angle from degrees to radians
 
-
-
 // This function transforms an atom by applying the specified transformation matrix
 // Input is a pointer to an atom and a 3x3 transformation matrix
 // Output is the transformed atom
-void transform_atom(atom *a, xform_matrix matrix)
-{
-    double x = a->x;
-    double y = a->y;
-    double z = a->z;
-
-    a->x = matrix[0][0] * x + matrix[0][1] * y + matrix[0][2] * z;
-    a->y = matrix[1][0] * x + matrix[1][1] * y + matrix[1][2] * z;
-    a->z = matrix[2][0] * x + matrix[2][1] * y + matrix[2][2] * z;
-}
-
-// This function transforms a molecule by applying the specified transformation matrix to each atom
-// Input is a pointer to a molecule and a 3x3 transformation matrix
-// Output is the transformed molecule
 void mol_xform(molecule *molecule, xform_matrix matrix)
 {
-    for (int i = 0; i < molecule->atom_no; i++)
-    {
-        transform_atom(molecule->atom_ptrs[i], matrix);
+    for (int i = 0; i < molecule->atoms; i++)
+    { 
+        atom *curr_atom = &molecule->atoms[i];
+        double x = curr_atom->x;
+        double y = curr_atom->y;
+        double z = curr_atom->z;
+        curr_atom->x = x * matrix[0][0] + y * matrix[0][1] + z * matrix[0][2];
+        curr_atom->y = x * matrix[1][0] + y * matrix[1][1] + z * matrix[1][2];
+        curr_atom->z = x * matrix[2][0] + y * matrix[2][1] + z * matrix[2][2];
     }
 }

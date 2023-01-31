@@ -1,31 +1,31 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+
 
 // define the structure of the object
-typedef struct atom
-{
-    // name
-    char element[3];
-    // location x-y-z
-    double x, y, z;
+typedef struct atom {
+  char element[3];
+  double x, y, z;
 } atom;
 
 // bond definiton 
 typedef struct bond {
-    // defining atom pointers
-    atom *a1, *a2;
-    // bonds
-    unsigned char epairs; 
-} bond; 
+  atom *a1, *a2;
+  unsigned char epairs;
+} bond;
 
 typedef struct molecule {
-    unsigned short atom_max, atom_no; // atom_no never greater then atom_max
-    atom *atoms, **atom_ptrs;
-    unsigned short bond_max, bond_no; 
-    bond *bonds, **bond_ptrs; // bond_no never greater then bon_max
-} molecule; 
+  unsigned short atom_max, atom_no;
+  atom *atoms, **atom_ptrs;
+  unsigned short bond_max, bond_no;
+  bond *bonds, **bond_ptrs;
+} molecule;
 
 // 3-d affine transformation matrix
 typedef double xform_matrix[3][3];
+
 
 void atomset(atom *atom, char element[3], double *x, double *y, double *z);
 void atomget(atom *atom, char element[3], double *x, double *y, double *z);
