@@ -210,10 +210,10 @@ void molappend_bond(molecule *molecule, bond *bo)
         }
         else
         {
-        // Else, double bond_max
+            // Else, double bond_max
             molecule->bond_max *= 2;
         }
-        // Increase the capacity of bonds and bond_ptrs arrays by reallocating memory 
+        // Increase the capacity of bonds and bond_ptrs arrays by reallocating memory
         molecule->bonds = realloc(molecule->bonds,
                                   molecule->bond_max * sizeof(bond));
         molecule->bond_ptrs = realloc(molecule->bond_ptrs,
@@ -233,11 +233,11 @@ void molsort(molecule *molecule)
     int (*compare)(const void *a, const void *b);
     // set the compare function to the compare_atom_z function
     compare = compare_atom_z;
-    //qsort the atoms and bonds in the molecule pointed to by molecule by z value
+    // qsort the atoms and bonds in the molecule pointed to by molecule by z value
     qsort(molecule->atom_ptrs, molecule->atom_no, sizeof(atom *), compare);
     // set the compare function to the compare_bond_z function
     compare = compare_bond_z;
-    //qsort the atoms and bonds in the molecule pointed to by molecule by z value
+    // qsort the atoms and bonds in the molecule pointed to by molecule by z value
     qsort(molecule->bond_ptrs, molecule->bond_no, sizeof(bond *), compare);
 }
 
@@ -319,7 +319,6 @@ void yrotation(xform_matrix xform_matrix, unsigned short deg)
     xform_matrix[2][2] = cos(rad);
 }
 
-
 // This function computes the transformation matrix for rotation about the z-axis
 // Input is the 3x3 transformation matrix and an angle in degrees
 // Output is the transformation matrix with z-axis rotation applied
@@ -341,23 +340,24 @@ void zrotation(xform_matrix xform_matrix, unsigned short deg)
     xform_matrix[2][2] = 1;
 }
 
-
-
 // Convert the input angle from degrees to radians
 
 // This function transforms an atom by applying the specified transformation matrix
 // Input is a pointer to an atom and a 3x3 transformation matrix
 // Output is the transformed atom
-void mol_xform(molecule *molecule, xform_matrix matrix)
+void mol_xform(molecule *mol, xform_matrix matrix)
 {
-    for (int i = 0; i < molecule->atoms; i++)
+    if (!mol)
+        return;
+    int i, j;
+    double x, y, z;
+    for (i = 0; i < mol->atom_no; i++)
     {
-        atom *transform_atom = &molecule->atoms[i];
-        double x = transform_atom->x;
-        double y = transform_atom->y;
-        double z = transform_atom->z;
-        transform_atom->x = x * matrix[0][0] + y * matrix[0][1] + z * matrix[0][2];
-        transform_atom->y = x * matrix[1][0] + y * matrix[1][1] + z * matrix[1][2];
-        transform_atom->z = x * matrix[2][0] + y * matrix[2][1] + z * matrix[2][2];
+        x = mol->atoms[i].x;
+        y = mol->atoms[i].y;
+        z = mol->atoms[i].z;
+        mol->atoms[i].x = matrix[0][0] * x + matrix[0][1] * y + matrix[0][2] * z + matrix[0][3];
+        mol->atoms[i].y = matrix[1][0] * x + matrix[1][1] * y + matrix[1][2] * z + matrix[1][3];
+        mol->atoms[i].z = matrix[2][0] * x + matrix[2][1] * y + matrix[2][2] * z + matrix[2][3];
     }
 }
