@@ -159,18 +159,18 @@ which may have been freed)*/
 void molappend_atom(molecule *mol, atom *at) {
   if (mol->atom_no == mol->atom_max) {
     mol->atom_max *= 2;
+    mol->atom_ptrs = realloc(mol->atom_ptrs, mol->atom_max * sizeof(atom*));
   }
-  
+
   if (mol->atom_ptrs == NULL) {
     mol->atom_ptrs = malloc(mol->atom_max * sizeof(atom*));
-} else {
-    mol->atom_ptrs = realloc(mol->atom_ptrs, mol->atom_max * sizeof(atom*));
-}
+  }
 
-
-  mol->atom_ptrs[mol->atom_no] = at;
+  mol->atoms[mol->atom_no] = *at;
+  mol->atom_ptrs[mol->atom_no] = &mol->atoms[mol->atom_no];
   ++mol->atom_no;
 }
+
 
 // Function to append a bond to the end of a molecule
 void molappend_bond(molecule *mol, bond *bo) {
