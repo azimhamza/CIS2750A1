@@ -156,33 +156,57 @@ should be made to point to the corresponding atoms in the new atoms array (not t
 which may have been freed)*/
 
 // adds it to the end
-void molappend_atom(molecule *mol, atom *at) {
-  if (mol->atom_no == mol->atom_max) {
-    mol->atom_max *= 2;
-    mol->atom_ptrs = realloc(mol->atom_ptrs, mol->atom_max * sizeof(atom*));
-  }
+void molappend_atom( molecule *molecule, atom *at ) {
+   int new_capacity;
+   int i;
 
-  if (mol->atom_ptrs == NULL) {
-    mol->atom_ptrs = malloc(mol->atom_max * sizeof(atom*));
-  }
+   // Check if the current atom_no equals atom_max
+   if(molecule->atom_no == molecule->atom_max) {
+      // If atom_max is 0, set it to 1
+      if(molecule->atom_max == 0) {
+         molecule->atom_max = 1;
+      }
+      // Else, double atom_max
+      else {
+         molecule->atom_max *= 2;
+      }
+      // Increase the capacity of atoms and atom_ptrs arrays
+      new_capacity = molecule->atom_max * sizeof(atom);
+      molecule->atoms = realloc(molecule->atoms, new_capacity);
+      new_capacity = molecule->atom_max * sizeof(atom *);
+      molecule->atom_ptrs = realloc(molecule->atom_ptrs, new_capacity);
 
-  mol->atoms[mol->atom_no] = *at;
-  mol->atom_ptrs[mol->atom_no] = &mol->atoms[mol->atom_no];
-  ++mol->atom_no;
+      // Update the pointers in atom_ptrs to point to the corresponding atoms in the new atoms array
+      for(i = 0; i < molecule->atom_no; i++) {
+         molecule->atom_ptrs[i] = &(molecule->atoms[i]);
+      }
+   }
+   // Copy the data pointed to by atom to the first "empty" atom in atoms in the molecule pointed to by molecule
+   molecule->atoms[molecule->atom_no] = *at;
+   molecule->atom_ptrs[molecule->atom_no] = &(molecule->atoms[molecule->atom_no]);
+   // Increment the value of atom_no
+   molecule->atom_no++;
 }
 
 
-// Function to append a bond to the end of a molecule
-void molappend_bond(molecule *mol, bond *bo) {
-  if (mol->bond_no == mol->bond_max) {
-    mol->bond_max *= 2;
-    mol->bonds = realloc(mol->bonds, mol->bond_max * sizeof(bond *));
-    mol->atom_ptrs = realloc(mol->bond_ptrs, mol->bond_max * sizeof(bond*));
+
+void molappend_bond(molecule *molecule, bond *bo) {
+  if (molecule->bond_no == molecule->bond_max) {
+    if (molecule->bond_max == 0) {
+      molecule->bond_max = 1;
+    } else {
+      molecule->bond_max *= 2;
+    }
+    molecule->bonds = realloc(molecule->bonds,
+                              molecule->bond_max * sizeof(bond));
+    molecule->bond_ptrs = realloc(molecule->bond_ptrs,
+                                  molecule->bond_max * sizeof(bond*));
   }
-  mol->bonds[mol->bond_no] = *bo;
-  mol->bond_ptrs[mol->bond_no] = &mol->bonds[mol->bond_no];
-  ++mol->bond_no;
+  molecule->bonds[molecule->bond_no] = *bo;
+  molecule->bond_ptrs[molecule->bond_no] = &(molecule->bonds[molecule->bond_no]);
+  molecule->bond_no++;
 }
+
 
 void molsort(molecule *molecule)
 {
