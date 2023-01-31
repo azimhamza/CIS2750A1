@@ -1,18 +1,25 @@
-CC=gcc
-CFLAGS=-c -Wall
-LDFLAGS=
-SOURCES=test1.c test2.c test3.c
-OBJECTS=$(SOURCES:.c=.o)
-EXECUTABLE=test1 test2 test3
+all: test1 test2 test3
 
-all: $(SOURCES) $(EXECUTABLE)
+test1: test1.o mol.o
+	gcc test1.o mol.o -o test1
 
-$(EXECUTABLE): $(OBJECTS)
-	$(CC) $(LDFLAGS) $@.o -o $@
+test2: test2.o mol.o
+	gcc test2.o mol.o -o test2
 
-.c.o:
-	$(CC) $(CFLAGS) $< -o $@
+test3: test3.o mol.o
+	gcc test3.o mol.o -o test3
+
+test1.o: test1.c mol.h
+	gcc -c -Wall test1.c -o test1.o
+
+test2.o: test2.c mol.h
+	gcc -c -Wall test2.c -o test2.o
+
+test3.o: test3.c mol.h
+	gcc -c -Wall test3.c -o test3.o
+
+mol.o: mol.c mol.h
+	gcc -c -Wall mol.c -o mol.o
 
 clean:
-	rm -rf *o $(EXECUTABLE)
-
+	rm -f test1 test2 test3 test1.o test2.o test3.o mol.o
