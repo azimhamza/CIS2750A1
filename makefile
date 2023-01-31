@@ -1,13 +1,13 @@
 all: test1 test2 test3
 
 test1: test1.o mol.o
-	gcc test1.o mol.o -o test1
+	gcc test1.o mol.o -o test1 -lm
 
 test2: test2.o mol.o
-	gcc test2.o mol.o -o test2
+	gcc test2.o mol.o -o test2 -lm
 
 test3: test3.o mol.o
-	gcc test3.o mol.o -o test3
+	gcc test3.o mol.o -o test3 -lm
 
 test1.o: test1.c mol.h
 	gcc -c -Wall test1.c -o test1.o
