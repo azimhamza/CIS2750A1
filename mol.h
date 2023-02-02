@@ -11,9 +11,12 @@ typedef struct atom {
 } atom;
 
 // bond definiton 
-typedef struct bond {
-  atom *a1, *a2;
-  unsigned char epairs;
+typedef struct bond
+{
+unsigned short a1, a2;
+unsigned char epairs;
+atom *atoms;
+double x1, x2, y1, y2, z, len, dx, dy;
 } bond;
 
 typedef struct molecule {
@@ -29,8 +32,8 @@ typedef double xform_matrix[3][3];
 
 void atomset(atom *atom, char element[3], double *x, double *y, double *z);
 void atomget(atom *atom, char element[3], double *x, double *y, double *z);
-void bondset(bond *bond, atom *a1, atom *a2, unsigned char epairs);
-void bondget(bond *bond, atom **a1, atom **a2, unsigned char *epairs);
+void bondset( bond *bond, unsigned short *a1, unsigned short *a2, atom **atoms, unsigned char *epairs );
+void bondget( bond *bond, unsigned short *a1, unsigned short *a2, atom **atoms, unsigned char *epairs );
 molecule *molmalloc(unsigned short atom_max, unsigned short bond_max);
 molecule *molcopy(molecule *src);
 void molfree(molecule *ptr);

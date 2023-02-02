@@ -31,22 +31,33 @@ void atomget(atom *atom, char element[3], double *x, double *y, double *z)
 }
 
 // bond setter
-void bondset(bond *bond, atom *a1, atom *a2, unsigned char epairs)
+// void bondset(bond *bond, atom *a1, atom *a2, unsigned char epairs)
+// {
+//     // setting the bonds a1 and a2
+//     bond->a1 = a1;
+//     bond->a2 = a2;
+//     bond->epairs = epairs;
+
+// }
+
+//updated bond setter 
+void bondset( bond *bond, unsigned short *a1, unsigned short *a2, atom **atoms, unsigned char *epairs )
 {
-    // setting the bonds a1 and a2
-    bond->a1 = a1;
-    bond->a2 = a2;
-    bond->epairs = epairs;
+    // setting the bonds a1 and a2  inside atoms and epairs 
+    bond->a1 = atoms[*a1]; 
+    bond->a2 = atoms[*a2]; 
+    bond->epairs = *epairs;
 }
 
 // bond getter
-void bondget(bond *bond, atom **a1, atom **a2, unsigned char *epairs)
+void bondget( bond *bond, unsigned short *a1, unsigned short *a2, atom **atoms, unsigned char *epairs )
 {
     // getting the bonds a1 and a2
     *a1 = bond->a1;
     *a2 = bond->a2;
     *epairs = bond->epairs;
 }
+
 
 // molecule malloc function to allocate memory for the molecule
 molecule *molmalloc(unsigned short atom_max, unsigned short bond_max)
@@ -226,6 +237,32 @@ void molappend_bond(molecule *molecule, bond *bo)
     molecule->bond_no++;
 }
 
+
+// void computer_coords function computes the z, x1, y1, x2, y2, len, dx, and dy values of the bond and set
+//them in the appropriate structure member variables.
+
+void computer_coords (bond *bond)
+{
+   // call all the values from bond 
+    atom *a1 = bond->a1;
+    atom *a2 = bond->a2;
+   // storing x1 and x2 
+    bond->x1 = a1->x;
+    bond->x2 = a2->x;
+    // storing y1 and y2
+    bond->y1 = a1->y;
+    bond->y2 = a2->y;
+    // computing z as the average distance between the two atoms
+    bond->z = (a1->z + a2->z) / 2;
+    // computing the length of the bond
+    bond->len = sqrt(pow(a1->x - a2->x, 2) + pow(a1->y - a2->y, 2) + pow(a1->z - a2->z, 2));
+}
+
+
+
+
+
+
 // sort the atoms and bonds in the molecule pointed to by molecule by z value
 void molsort(molecule *molecule)
 {
@@ -265,8 +302,8 @@ int compare_bond_z(const void *a, const void *b)
     bond *ab = *(bond **)a;
     bond *bb = *(bond **)b;
     // get the z values of the bonds
-    double za = (ab->a1->z + ab->a2->z) / 2.0;
-    double zb = (bb->a1->z + bb->a2->z) / 2.0;
+    double za = ab->z;
+    double zb = bb->z;
     // compare the z values if za < zb return -1, if za > zb return 1, else return 0
     if (za < zb)
         return -1;
@@ -366,4 +403,6 @@ void mol_xform(molecule *molecule, xform_matrix matrix)
         molecule->atoms[i].y = matrix[1][0] * x + matrix[1][1] * y + matrix[1][2] * z;
         molecule->atoms[i].z = matrix[2][0] * x + matrix[2][1] * y + matrix[2][2] * z;
     }
+    // apply the compute_coords function to the molecule
+    compute_coords(molecule);
 }
