@@ -13,7 +13,7 @@ typedef struct atom {
 // bond definiton 
 typedef struct bond
 {
-unsigned short a1, a2;
+unsigned short a1, a2; // index of atoms
 unsigned char epairs;
 atom *atoms;
 double x1, x2, y1, y2, z, len, dx, dy;
@@ -46,5 +46,5 @@ void xrotation(xform_matrix xform_matrix, unsigned short deg);
 void yrotation(xform_matrix xform_matrix, unsigned short deg);
 void zrotation(xform_matrix xform_matrix, unsigned short deg);
 void mol_xform(molecule *molecule, xform_matrix matrix);
-void computer_coords (bond *bond);
+void compute_coords (bond *bond);
 
