@@ -1,31 +1,22 @@
-all: test1 test2 test3 testPart1.c
+CC = clang
+CFLAGS = -Wall -std=c99 -pedantic
+INCLUDES = /Library/Frameworks/Python.framework/Versions/3.11/include/python3.11 
+LIB= /Library/Frameworks/Python.framework/Versions/3.11/lib
 
-test1: test1.o mol.o
-	gcc test1.o mol.o -o test1 -lm
+all: _molecule.so
 
-test2: test2.o mol.o
-	gcc test2.o mol.o -o test2 -lm
+_molecule.so: molecule_wrap.o libmol.so
+	$(CC) $(CFLAGS) -shared molecule_wrap.o -L. -lmol -L$(LIB) -lpython3.11 -dynamiclib -o _molecule.so
 
-test3: test3.o mol.o
-	gcc test3.o mol.o -o test3 -lm
+molecule_wrap.o: molecule_wrap.c
+	$(CC) -c $(CFLAGS) molecule_wrap.c -I$(INCLUDES) -fPIC -o molecule_wrap.o
 
-testPart1: testPart1.o mol.o
-	gcc testPart1.o mol.o -o testPart1 -lm
+libmol.so: mol.o
+	$(CC) mol.o -shared -o libmol.so
 
-test1.o: test1.c mol.h
-	gcc -c -Wall test1.c -o test1.o
-
-test2.o: test2.c mol.h
-	gcc -c -Wall test2.c -o test2.o
-
-test3.o: test3.c mol.h
-	gcc -c -Wall test3.c -o test3.o
-
-testPart1.o : testPart1.c mol.h
-	gcc -c -Wall testPart1.c -o testPart1.o
-
-mol.o: mol.c mol.h
-	gcc -c -Wall mol.c -o mol.o
+mol.o: mol.c
+	$(CC) -c $(CFLAGS) -fPIC mol.c
 
 clean:
-	rm -f test1 test2 test3 test1.o test2.o test3.o testPart1.o mol.o
+	rm -f *.o *.so
+
