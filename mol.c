@@ -38,7 +38,7 @@ void bondset(bond *bond, unsigned short *a1, unsigned short *a2, atom **atoms, u
     bond->a1 = atoms[*a1];
     bond->a2 = atoms[*a2];
     bond->atoms = *atoms;
-    bond->epairs = *epairs;
+    bond->epairs = epairs;
     compute_coords(bond);
 }
 
@@ -64,7 +64,6 @@ molecule *molmalloc(unsigned short atom_max, unsigned short bond_max)
     
     // allocating memory for the atoms and atom pointers and checking for errors
     ptr->atom_max = atom_max;
-    ptr->atom_no = 0;
     ptr->atoms = (atom *)malloc(atom_max * sizeof(atom));
     if (ptr->atoms == NULL)
     {
@@ -83,7 +82,6 @@ molecule *molmalloc(unsigned short atom_max, unsigned short bond_max)
 
     // allocating memory for the bonds and bond pointers and checking for errors
     ptr->bond_max = bond_max;
-    ptr->bond_no = 0;
     ptr->bonds = (bond *)malloc(bond_max * sizeof(bond));
     if (ptr->bonds == NULL)
     {
@@ -179,25 +177,30 @@ void molappend_atom(molecule *molecule, atom *at)
         {
             // Set atom_max to 1
             molecule->atom_max = 1;
+            molecule->atoms = (atom *)malloc(sizeof(atom) * molecule->atom_max);
+            molecule->atom_ptrs = (atom **)malloc(sizeof(atom *) * molecule->atom_max);
         }
         // Else, double atom_max
         else
         {
             molecule->atom_max *= 2;
+            molecule->atoms = (atom *)realloc(molecule->atoms, sizeof(atom) * molecule->atom_max);
+            molecule->atom_ptrs = (atom **)realloc(molecule->atom_ptrs, sizeof(atom *) * molecule->atom_max);
+
         }
-        // Increase the capacity of atoms and atom_ptrs arrays
-        new_capacity = molecule->atom_max * sizeof(atom);
-        // Reallocate memory for the atoms array
-        molecule->atoms = realloc(molecule->atoms, new_capacity);
-        // Reallocate memory for the atom_ptrs array
-        new_capacity = molecule->atom_max * sizeof(atom *);
-        // Reallocate memory for the atom_ptrs array
-        molecule->atom_ptrs = realloc(molecule->atom_ptrs, new_capacity);
+        if (molecule->atoms == NULL || molecule->atom_ptrs == NULL)
+        {
+            perror("memory allocation error in molappend_atom <Error>");
+            free(molecule->atoms);
+            free(molecule->atom_ptrs);
+            free(molecule);
+            
+        }
 
         // Update the pointers in atom_ptrs to point to the corresponding atoms in the new atoms array
-        for (i = 0; i < molecule->atom_no; i++)
+        
+        for (int i = 0; i < molecule->atom_no; i++)
         {
-            // Set the pointer in atom_ptrs to point to the corresponding atom in the atoms array
             molecule->atom_ptrs[i] = &(molecule->atoms[i]);
         }
     }
@@ -222,9 +225,21 @@ void molappend_bond(molecule *molecule, bond *bo)
         }
         if (molecule->bond_max == molecule->bond_no)
         {
-            molecule->bond_max * 2;
-            molecule->bonds = (struct bond *)realloc(molecule->bonds, sizeof(struct bond) * molecule->bond_max);
-            molecule->bond_ptrs = (struct bond **)realloc(molecule->bond_ptrs, sizeof(struct bond *) * molecule->bond_max);
+            molecule->bond_max *= 2;
+            struct bond *new_bonds = (struct bond *)realloc(molecule->bonds, sizeof(struct bond) * molecule->bond_max);
+            if (new_bonds == NULL)
+            {
+                perror("null bonds in molappend_bond <Error>");
+                return;
+            }
+            molecule->bonds = new_bonds;
+            struct bond **new_bond_ptrs = (struct bond **)realloc(molecule->bond_ptrs, sizeof(struct bond *) * molecule->bond_max);
+            if (new_bond_ptrs == NULL)
+            {
+                perror("null bond_ptrs in molappend_bond <Error>");
+                return;
+            }
+            molecule->bond_ptrs = new_bond_ptrs;
 
             for (int i = 0; i < molecule->bond_no; i++)
             {
@@ -238,6 +253,7 @@ void molappend_bond(molecule *molecule, bond *bo)
         molecule->bond_no++;
     }
 }
+
 
 // void print_molecule function prints the molecule structure pointed to by molecule to the file pointed to by fp.
 int bond_comp( const void *a, const void *b){
@@ -257,7 +273,6 @@ int bond_comp( const void *a, const void *b){
 
 void compute_coords(bond *bond)
 {
-
     // call all the values from bond
     atom *a1 = bond->a1;
     atom *a2 = bond->a2;
@@ -270,60 +285,63 @@ void compute_coords(bond *bond)
     // computing z as the average distance between the two atoms
     bond->z = (bond->atoms[bond->a1].z + bond->atoms[bond->a2].z) / 2;
     // computing the length of the bond
-    bond->z = sqrt(pow(bond->x2 - bond->x1, 2) + pow(bond->y2 - bond->y1, 2));
+    bond->len = sqrt(pow(bond->x2 - bond->x1, 2) + pow(bond->y2 - bond->y1, 2));
     // computing dx and dy
     bond->dx = (bond->x2 - bond->x1) / bond->len;
     bond->dy = (bond->y2 - bond->y1) / bond->len;
 }
 
-// sort the atoms and bonds in the molecule pointed to by molecule by z value
-void molsort(molecule *molecule)
-{
-    // set the compare function to the compare_atom_z function
-    int (*compare)(const void *a, const void *b);
-    // set the compare function to the compare_atom_z function
-    compare = compare_atom_z;
-    // qsort the atoms and bonds in the molecule pointed to by molecule by z value
-    qsort(molecule->atom_ptrs, molecule->atom_no, sizeof(atom *), compare);
-    // set the compare function to the compare_bond_z function
-    compare = compare_bond_z;
-    // qsort the atoms and bonds in the molecule pointed to by molecule by z value
-    qsort(molecule->bond_ptrs, molecule->bond_no, sizeof(bond *), compare);
-}
-
-/* helper function for molsort to compare z values of atoms */
+// Comparison functions for qsort
 int compare_atom_z(const void *a, const void *b)
 {
-    // cast the void pointers to atom pointers
-    atom *aa = *(atom **)a;
-    atom *bb = *(atom **)b;
-    // get the z values of the atoms
-    double za = aa->z;
-    double zb = bb->z;
-    // compare the z values if za < zb return -1, if za > zb return 1, else return 0
-    if (za < zb)
+    atom *atom_a = (atom *)a;
+    atom *atom_b = (atom *)b;
+    if (atom_a->z < atom_b->z)
+    {
         return -1;
-    else if (za > zb)
+    }
+    else if (atom_a->z > atom_b->z)
+    {
         return 1;
-    return 0;
+    }
+    else
+    {
+        return 0;
+    }
 }
 
-/* helper function for molsort to compare z values of bonds */
 int compare_bond_z(const void *a, const void *b)
 {
-    // cast the void pointers to bond pointers
-    bond *ab = *(bond **)a;
-    bond *bb = *(bond **)b;
-    // get the z values of the bonds
-    double za = ab->z;
-    double zb = bb->z;
-    // compare the z values if za < zb return -1, if za > zb return 1, else return 0
-    if (za < zb)
+    bond *bond_a = *(bond **)a;
+    bond *bond_b = *(bond **)b;
+    if (bond_a->z < bond_b->z)
+    {
         return -1;
-    else if (za > zb)
+    }
+    else if (bond_a->z > bond_b->z)
+    {
         return 1;
-    return 0;
+    }
+    else
+    {
+        return 0;
+    }
 }
+
+void molsort(molecule *molecule)
+{
+    // Sort the atoms by z-coordinate
+    qsort(molecule->atoms, molecule->atom_no, sizeof(atom), compare_atom_z);
+
+    // Sort the bonds by z-coordinate
+    for (int i = 0; i < molecule->bond_no; i++)
+    {
+        molecule->bond_ptrs[i] = &(molecule->bonds[i]);
+    }
+    qsort(molecule->bond_ptrs, molecule->bond_no, sizeof(bond *), compare_bond_z);
+}
+
+
 
 // Function to apply a rotation transformation in the X-axis to a given transformation matrix
 // deg - angle of rotation in degrees
@@ -340,11 +358,11 @@ void xrotation(xform_matrix xform_matrix, unsigned short deg)
     xform_matrix[0][1] = 0;
     xform_matrix[0][2] = 0;
     xform_matrix[1][0] = 0;
-    xform_matrix[1][1] = cos(rad);
+    xform_matrix[1][1] = 1;
     xform_matrix[1][2] = -sin(rad);
     xform_matrix[2][0] = 0;
     xform_matrix[2][1] = sin(rad);
-    xform_matrix[2][2] = cos(rad);
+    xform_matrix[2][2] = 1;
 }
 
 // This function calculates the transformation matrix for y-axis rotation
