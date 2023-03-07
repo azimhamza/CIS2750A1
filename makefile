@@ -18,7 +18,7 @@ molecule_wrap.o: swig
     $(CC) -c $(CFLAGS) -c molecule_wrap.c -I$(INCLUDES) -fPIC -o molecule_wrap.o
 
 _molecule.so: molecule_wrap.o libmol.so
-    $(CC) $(CFLAGS) -shared molecule_wrap.o -L. -lmol -L$(LIB) -lpython3.7m -dynamiclib -o _molecule.so
+    $(CC) $(CFLAGS) -shared molecule_wrap.o -L. -lmol -L$(LIB) -lpython3.7m -shared -o _molecule.so
 
 test: test.o libmol.so
     $(CC) test.o -L. -lmol -lm -o test
