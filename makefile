@@ -5,20 +5,20 @@ LIB = /usr/lib/python3.7/config-3.7m-x86_64-linux-gnu
 
 all: libmol.so _molecule.so
 
+T: MolDisplay.py
+	python3.7 MolDisplay.py
+
+MolTest: _molecule.so moltest.py
+	python3.7 moltest.py
+
 swig: molecule.i
 	swig -python molecule.i
 
-_molecule.so: molecule_wrap.o libmol.so
-	$(CC) $(CFLAGS) -shared molecule_wrap.o -L. -lmol -L$(LIB) -lpython3.7m -o _molecule.so
-
 molecule_wrap.o: swig
-	$(CC) -c $(CFLAGS) molecule_wrap.c -I$(INCLUDES) -fPIC -o molecule_wrap.o
+	$(CC) -c $(CFLAGS) -c molecule_wrap.c -I$(INCLUDES) -fPIC -o molecule_wrap.o
 
-libmol.so: mol.o
-	$(CC) mol.o -shared -o libmol.so
-
-mol.o: mol.c
-	$(CC) -c $(CFLAGS) -fPIC mol.c
+_molecule.so: molecule_wrap.o libmol.so
+	$(CC) $(CFLAGS) -shared molecule_wrap.o -L. -lmol -lpython3.7 -dynamiclib -o _molecule.so
 
 test: test.o libmol.so 
 	$(CC) test.o -L. -lmol -lm -o test 
@@ -26,15 +26,15 @@ test: test.o libmol.so
 test.o: test.c mol.h
 	$(CC) -c $(CFLAGS) test.c 
 
+mol.o: mol.c
+	$(CC) -c $(CFLAGS) -fPIC mol.c
+
+libmol.so: mol.o
+	$(CC) mol.o -shared -o libmol.so
+
 clean: 
 	rm -f *.o *.so mol molecule.py molecule_wrap.c test
 
-.PHONY: server
-server:
-	python3 server.py
-
-.PHONY: run-server
 run-server:
-	@read -p "Enter port number: " port; python3 server.py localhost $$port &
-	sleep 1
-	open http://localhost:$$port
+	@read -p "Enter the port number to use for the server: " port; \
+	python3.7 server.py localhost "$$port"
