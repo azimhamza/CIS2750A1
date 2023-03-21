@@ -35,7 +35,10 @@ libmol.dylib: mol.o
 	$(CC) -dynamiclib -o libmol.dylib mol.o
 
 run-server:
-	python3.11 server.py $(PORT)
+	python3.11 server.py $(PORT)\
 
-clean:
+sql:
+	python3.11 molsql.py
+
+clear:
 	rm -f *.o *.so *.dylib molecule.py molecule_wrap.c test

@@ -77,22 +77,25 @@ molecule *molmalloc(unsigned short atom_max, unsigned short bond_max)
     // allocating memory for the bonds and bond pointers and checking for errors
     ptr->bond_max = bond_max;
     ptr->bonds = 0;
+
     if (ptr->bond_max == 0)
     {
         ptr->bond_ptrs = NULL;
         ptr->bonds = NULL;
-        perror("null bonds in molmalloc <Error>"); // free the molecule memory before returning NULL
     }
     else
     {
         ptr->bond_ptrs = (bond **)malloc(bond_max * sizeof(bond *));
         ptr->bonds = (struct bond *)malloc(sizeof(struct bond) * bond_max);
+
+        if (ptr->bond_ptrs == NULL || ptr->bonds == NULL)
+        {
+            perror("memory allocation error in molmalloc <Error>");
+            free(ptr);
+            return NULL;
+        }
     }
 
-    if (ptr->bond_ptrs == NULL)
-    {
-        perror("null bond_ptrs in molmalloc <Error>"); // free the molecule memory before returning NULL
-    }
     // return the molecule
     return ptr;
 }

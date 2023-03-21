@@ -1,16 +1,8 @@
-import molecule;
-
+import molecule
+import sqlite3
+import os
 # -----------------------------Given Code---------------------------------------
-radius = {'H': 25,
-          'C': 40,
-          'O': 40,
-          'N': 40,
-          }
-element_name = {'H': 'grey',
-                'C': 'black',
-                'O': 'red',
-                'N': 'blue',
-                }
+
 header = """<svg version="1.1" width="1000" height="1000"
 xmlns="http://www.w3.org/2000/svg">"""
 footer = """</svg>"""
@@ -45,7 +37,7 @@ class Atom:
         colour = element_name[self.atom.element]
 
         # Return the SVG circle element string in the desired format
-        return '  <circle cx="%.2f" cy="%.2f" r="%d" fill="%s"/>\n'% (x, y, rad, colour)
+        return '  <circle cx="%.2f" cy="%.2f" r="%d" fill="url(#%s)"/>\n' % (x, y, rad, colour)
 
 
 # Define the Bond class
@@ -54,8 +46,9 @@ class Bond:
     # Initialize a Bond object with a bond class/struct as its argument
     def __init__(self, c_bond):
         self.bond = c_bond
-        self.z = c_bond.z  # Compute the z value based on x and y coordinates of both atoms in the bond
-          # Store the wrapped bond itself in the bond attribute
+        # Compute the z value based on x and y coordinates of both atoms in the bond
+        self.z = c_bond.z
+        # Store the wrapped bond itself in the bond attribute
 
     # Return a string that displays the relevant information of the wrapped bond
     def __str__(self):
@@ -87,43 +80,43 @@ def JoinString(s):
 class Molecule(molecule.molecule):
 
     def __str__(self):
-        for i in range (self.atom_no):
-            A= Atom(self.get_atom(i))
+        for i in range(self.atom_no):
+            A = Atom(self.get_atom(i))
             A.__str__()
         for i in range(self.bond_no):
-            B=Bond(self.get_bond(i))
+            B = Bond(self.get_bond(i))
             B.__str__()
 
     def _svg_(self):
-        string=header
-        list=[]
+        string = header
+        list = []
         i, j = 0, 0
 
         while i < self.atom_no and j < self.bond_no:
             if self.get_atom(i).z < self.get_bond(j).z:
                 list.append(Atom(self.get_atom(i)))
-                A=Atom(self.get_atom(i))
-                append =A.svg()
+                A = Atom(self.get_atom(i))
+                append = A.svg()
                 string += append
                 i += 1
             else:
                 list.append(Bond(self.get_bond(j)))
-                B=Bond(self.get_bond(j))
-                append =B.svg()
+                B = Bond(self.get_bond(j))
+                append = B.svg()
                 string += append
                 j += 1
-        
+
         while i < self.atom_no:
             list.append(Atom(self.get_atom(i)))
-            A=Atom(self.get_atom(i))
-            append =A.svg()
+            A = Atom(self.get_atom(i))
+            append = A.svg()
             string += append
             i += 1
-        
+
         while j < self.bond_no:
             list.append(Bond(self.get_bond(j)))
-            B=Bond(self.get_bond(j))
-            append =B.svg()
+            B = Bond(self.get_bond(j))
+            append = B.svg()
             string += append
             j += 1
 
@@ -132,8 +125,10 @@ class Molecule(molecule.molecule):
         return string
 
     def parse(self, f):
+        i = 0
         for i in range(3):  # skip first 3 lines
             f.readline()
+            i += 1
 
         first_line = JoinString(f.readline().strip())
         first_line_array = first_line.split(' ')
@@ -145,24 +140,15 @@ class Molecule(molecule.molecule):
             atom_line_array = atom_line.split(' ')
             self.append_atom(atom_line_array[3], float(atom_line_array[0]), float(
                 atom_line_array[1]), float(atom_line_array[2]))
+            i += 1
 
         for i in range(bond_m):  # parse through bonds
             bond_line = JoinString(f.readline().strip())
             bond_line_array = bond_line.split(' ')
-            self.append_bond(int(bond_line_array[0]), int(
-                bond_line_array[1]), int(bond_line_array[2]))
+            # Subtract 1 from the atom numbers to adjust for 0-indexing
+            self.append_bond(int(bond_line_array[0])-1, int(
+                bond_line_array[1])-1, int(bond_line_array[2]))
+            i += 1
 
-
-with open('CID_31260.sdf', 'r') as f:
-
-    mol = Molecule()
-
-    mol.parse(f)
-    mol.sort()
-    mol.__str__()
-    H = mol._svg_()
-    print (H);
-
-    # Open a new file to write the SVG output
-    with open('CID_31260.svg', 'w') as outfile:
-        outfile.write(H)
+        # Sort the molecule after parsing is complete
+        self.sort()
