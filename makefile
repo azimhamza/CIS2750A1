@@ -17,7 +17,7 @@ molecule_wrap.c: molecule.i
 	swig -python -o molecule_wrap.c molecule.i
 
 molecule_wrap.o: molecule_wrap.c
-	$(CC) -c $(CFLAGS) -c molecule_wrap.c -I$(INCLUDES) -fPIC -o molecule_wrap.o
+	$(CC) $(CFLAGS) -c molecule_wrap.c -I$(INCLUDES) -fPIC -o molecule_wrap.o
 
 _molecule.so: molecule_wrap.o libmol.so
 	$(CC) $(CFLAGS) -shared molecule_wrap.o -L. -lmol -L$(LIB) -lpython3.7m -o _molecule.so
@@ -41,4 +41,4 @@ sql:
 	python3.7 molsql.py
 
 clean:
-	rm -f *.o *.so *.dylib molecule.py molecule_wrap.c test
+	rm -f *.o *.so molecule.py molecule_wrap.c test
