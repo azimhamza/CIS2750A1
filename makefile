@@ -1,7 +1,7 @@
 CC = clang
 CFLAGS = -Wall -std=c99 -pedantic
 INCLUDES = /usr/include/python3.7m
-LIB = /usr/lib/python3.7/config-3.7m-x86_64-linux-gnu
+LIB = usr/lib/python3.7/config-3.7m-x86_64-linux-gnu
 
 PORT = 8080
 
