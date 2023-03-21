@@ -40,5 +40,5 @@ run-server:
 sql:
 	python3.11 molsql.py
 
-clear:
+clean:
 	rm -f *.o *.so *.dylib molecule.py molecule_wrap.c test

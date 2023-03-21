@@ -1,8 +1,8 @@
 import molecule
-import sqlite3
-import os
-# -----------------------------Given Code---------------------------------------
 
+# -----------------------------Given Code---------------------------------------
+radius = 0
+element_name = {}
 header = """<svg version="1.1" width="1000" height="1000"
 xmlns="http://www.w3.org/2000/svg">"""
 footer = """</svg>"""
@@ -80,14 +80,12 @@ def JoinString(s):
 class Molecule(molecule.molecule):
 
     def __str__(self):
-        for i in range(self.atom_no):
-            A = Atom(self.get_atom(i))
-            A.__str__()
-        for i in range(self.bond_no):
-            B = Bond(self.get_bond(i))
-            B.__str__()
+        atom_str = "\n".join([str(Atom(self.get_atom(i))) for i in range(self.atom_no)])
+        bond_str = "\n".join([str(Bond(self.get_bond(i))) for i in range(self.bond_no)])
+        return f"{atom_str}\n{bond_str}"
 
-    def _svg_(self):
+
+    def svg(self):
         string = header
         list = []
         i, j = 0, 0
@@ -125,10 +123,10 @@ class Molecule(molecule.molecule):
         return string
 
     def parse(self, f):
-        i = 0
+      
         for i in range(3):  # skip first 3 lines
             f.readline()
-            i += 1
+            
 
         first_line = JoinString(f.readline().strip())
         first_line_array = first_line.split(' ')
@@ -140,15 +138,20 @@ class Molecule(molecule.molecule):
             atom_line_array = atom_line.split(' ')
             self.append_atom(atom_line_array[3], float(atom_line_array[0]), float(
                 atom_line_array[1]), float(atom_line_array[2]))
-            i += 1
+            
 
         for i in range(bond_m):  # parse through bonds
             bond_line = JoinString(f.readline().strip())
             bond_line_array = bond_line.split(' ')
             # Subtract 1 from the atom numbers to adjust for 0-indexing
-            self.append_bond(int(bond_line_array[0])-1, int(
-                bond_line_array[1])-1, int(bond_line_array[2]))
-            i += 1
+            self.append_bond(int(bond_line_array[0]), int(
+                bond_line_array[1]), int(bond_line_array[2])-1)
+            
+            
+            
 
-        # Sort the molecule after parsing is complete
-        self.sort()
+    # Sort the molecule after parsing is complete
+    def do_POST(self):
+        self.atoms.sort(key=lambda x: x.atom_id)
+        self.bonds.sort(key=lambda x: x.bond_id)
+   
