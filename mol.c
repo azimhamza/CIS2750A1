@@ -312,11 +312,11 @@ void xrotation(xform_matrix xform_matrix, unsigned short deg)
     xform_matrix[0][1] = 0;
     xform_matrix[0][2] = 0;
     xform_matrix[1][0] = 0;
-    xform_matrix[1][1] = 1;
+    xform_matrix[1][1] = cos(rad);
     xform_matrix[1][2] = -sin(rad);
     xform_matrix[2][0] = 0;
     xform_matrix[2][1] = sin(rad);
-    xform_matrix[2][2] = 1;
+    xform_matrix[2][2] = cos(rad);
 }
 
 // This function calculates the transformation matrix for y-axis rotation

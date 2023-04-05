@@ -1,4 +1,4 @@
-/* File:  mol.i */
+/* File:  molecule.i */
 %module molecule
 %{
   #include "mol.h"
@@ -25,6 +25,34 @@
   bond( bond *bond )
   {
     return bond;
+  }
+};
+
+%extend mx_wrapper {
+  mx_wrapper( int xrot, int yrot, int zrot )
+  {
+    mx_wrapper *mx;
+
+    mx = malloc( sizeof( mx_wrapper ) );
+    if ( (xrot!=0) && (yrot==0) && (zrot==0) )
+    {
+      xrotation( mx->xform_matrix, xrot );
+    }
+    if ( (xrot==0) && (yrot!=0) && (zrot==0) )
+    {
+      yrotation( mx->xform_matrix, yrot );
+    }
+    if ( (xrot==0) && (yrot==0) && (zrot!=0) )
+    {
+      zrotation( mx->xform_matrix, zrot );
+    }
+
+    return mx;
+  }
+
+  ~mx_wrapper()
+  {
+    free( $self );
   }
 };
 
@@ -55,8 +83,8 @@
   void append_bond( unsigned short a1, unsigned short a2, unsigned char epairs )
   {
     bond b1;
-    b1.a1 = a1-1;
-    b1.a2 = a2-1;
+    b1.a1 = a1;
+    b1.a2 = a2;
     b1.atoms = $self->atoms;
     b1.epairs = epairs;
     compute_coords( &b1 );
@@ -78,6 +106,11 @@
   void sort()
   {
     molsort( $self );
+  }
+
+  void xform( xform_matrix xform_matrix )
+  {
+    mol_xform( self, xform_matrix );
   }
 };
 

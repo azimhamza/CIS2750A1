@@ -144,8 +144,8 @@ class Database:
         c = self.conn.cursor()
             
         # Insert the bond attributes into the Bonds table
-        c.execute('''INSERT INTO Bonds (A1, A2, EPAIRS)
-                    VALUES (?, ?, ?)''', (bond.a1, bond.a2,bond.epairs))
+        c.execute('''INSERT INTO Bonds (BOND_ID ,A1, A2, EPAIRS)
+                    VALUES (?, ?, ?, ?)''', (None, bond.a1, bond.a2,bond.epairs))
             
         # Get the ID of the newly inserted bond
         bond_id = c.lastrowid
