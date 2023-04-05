@@ -13,3 +13,5 @@ __memmove_avx_unaligned_erms () at ../sysdeps/x86_64/multiarch/memmove-vec-unali
 369     ../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S: No such file or directory.>>
 
 This error only occurs with the molsql.py file and could not be further assessed. 
+
+To run the code, simply type make, and the code will generate the swig files
