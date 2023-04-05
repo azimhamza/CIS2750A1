@@ -1,25 +1,25 @@
-CC = clang
+CC = gcc
 CFLAGS = -Wall -std=c99 -pedantic
 INCLUDES = /usr/include/python3.7m
 LIB = /usr/lib/python3.7/config-3.7m-x86_64-linux-gnu
-
 PORT = 8080
 
+all: T MolTest
 
-T: MolDisplay.py
+T: molecule.py MolDisplay.py
 	python3.7 MolDisplay.py
 
-MolTest: _molecule.so moltest.py
+MolTest: molecule.py _molecule.so moltest.py
 	python3.7 moltest.py
 
-molecule_wrap.c: molecule.i
+molecule.py: molecule.i mol.c mol.h
 	swig -python -o molecule_wrap.c molecule.i
+	$(CC) -c -fpic molecule_wrap.c -I$(INCLUDES)
+	$(CC) -c -fpic mol.c -I$(INCLUDES)
+	$(CC) -shared molecule_wrap.o mol.o -o _molecule.so
 
-molecule_wrap.o: molecule_wrap.c
-	$(CC) -c $(CFLAGS) -c molecule_wrap.c -I$(INCLUDES) -fPIC -o molecule_wrap.o
-
-_molecule.so: molecule_wrap.o libmol.so
-	$(CC) $(CFLAGS) -shared molecule_wrap.o -L. -lmol -L$(LIB) -lpython3.7m -o _molecule.so
+_molecule.so: molecule.py mol.o
+	$(CC) -shared -o _molecule.so mol.o
 
 test: test.o libmol.so
 	$(CC) test.o -L. -lmol -lm -o test
@@ -33,8 +33,8 @@ mol.o: mol.c
 libmol.so: mol.o
 	$(CC) -shared -o libmol.so mol.o
 
-run-server:
-	python3.7 server.py $(PORT)
+# run-server:
+# 	python3.7 server.py $(PORT)
 
 sql:
 	python3.7 molsql.py
