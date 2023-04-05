@@ -1,7 +1,7 @@
-CC = gcc
+CC = clang
 CFLAGS = -Wall -std=c99 -pedantic
-INCLUDES = /Library/Frameworks/Python.framework/Versions/3.11/include/python3.11
-LIB = /Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/config-3.11-darwin
+INCLUDES = /usr/include/python3.7m
+LIB = /usr/lib/python3.7m/config-3.7m-x86_64-linux-gnu
 PORT = 8080
 
 all: T MolTest
@@ -37,7 +37,7 @@ libmol.so: mol.o
 # 	python3.11 server.py $(PORT)
 
 sql:
-	python3.11 molsql.py
+	python3.7m molsql.py
 
 clean:
 	rm -f *.o *.so molecule.py molecule_wrap.c test
