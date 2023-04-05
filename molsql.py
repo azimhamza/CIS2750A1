@@ -306,12 +306,12 @@ if __name__ == "__main__":
     fp = open( 'CID_31260.sdf' );
     db.add_molecule( 'Isopentanol', fp );
     # display tables
-    print( db.conn.execute( "SELECT * FROM Elements;" ).fetchall() );
-    print( db.conn.execute( "SELECT * FROM Molecules;" ).fetchall() );
-    print( db.conn.execute( "SELECT * FROM Atoms;" ).fetchall() );
-    print( db.conn.execute( "SELECT * FROM Bonds;" ).fetchall() );
-    print( db.conn.execute( "SELECT * FROM MoleculeAtom;" ).fetchall() );
-    print( db.conn.execute( "SELECT * FROM MoleculeBond;" ).fetchall() );
+    # print( db.conn.execute( "SELECT * FROM Elements;" ).fetchall() );
+    # print( db.conn.execute( "SELECT * FROM Molecules;" ).fetchall() );
+    # print( db.conn.execute( "SELECT * FROM Atoms;" ).fetchall() );
+    # print( db.conn.execute( "SELECT * FROM Bonds;" ).fetchall() );
+    # print( db.conn.execute( "SELECT * FROM MoleculeAtom;" ).fetchall() );
+    # print( db.conn.execute( "SELECT * FROM MoleculeBond;" ).fetchall() );
 
     MolDisplay.radius = db.radius();
     MolDisplay.element_name = db.element_name();
